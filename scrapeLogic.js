@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const axios = require("axios");
 require("dotenv").config();
 
 const scrapeLogic = async (res) => {
@@ -34,8 +35,21 @@ const scrapeLogic = async (res) => {
       });
 
       console.log(rewards);
-      res.send(rewards);
+      return rewards;
     });
+
+    // Send rewards value to Telegram bot
+    const botToken = '7873333719:AAEBhl6XwnBm-FnrfjDvFv-jkqJhI4QMCRo'; // Add your bot token to .env
+    const chatId = '558028408'; // Add your chat ID to .env
+    const message = `${JSON.stringify(rewardsValue)}`;
+
+    await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      chat_id: chatId,
+      text: message,
+    });
+
+    res.send(rewardsValue);
+    
   } catch (e) {
     console.error(e);
     res.send(`Something went wrong while running Puppeteer: ${e}`);
