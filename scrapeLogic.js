@@ -17,29 +17,25 @@ const scrapeLogic = async (res) => {
   try {
     const page = await browser.newPage();
 
-    await page.goto("https://developer.chrome.com/");
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    
+    await page.goto('https://www.coke2home.com/thunderwheels', {
+      waitUntil: 'networkidle2',
+      timeout: 60000,
+    });
 
-    // Set screen size
-    await page.setViewport({ width: 1080, height: 1024 });
+    const rewardsValue = await page.evaluate(() => {
+      const labels = ['bike', 'fancode', 'fk gc'];
+      const elements = document.querySelectorAll('.voucher-counts .group.flex .data .text');
+      const rewards = {};
 
-    // Type into search box
-    await page.type(".search-box__input", "automate beyond recorder");
+      elements.forEach((el, index) => {
+        rewards[labels[index]] = el ? el.innerText : null;
+      });
 
-    // Wait and click on first result
-    const searchResultSelector = ".search-box__link";
-    await page.waitForSelector(searchResultSelector);
-    await page.click(searchResultSelector);
-
-    // Locate the full title with a unique string
-    const textSelector = await page.waitForSelector(
-      "text/Customize and automate"
-    );
-    const fullTitle = await textSelector.evaluate((el) => el.textContent);
-
-    // Print the full title
-    const logStatement = `The title of this blog post is ${fullTitle}`;
-    console.log(logStatement);
-    res.send(logStatement);
+      console.log(rewards);
+      res.send(rewards);
+    });
   } catch (e) {
     console.error(e);
     res.send(`Something went wrong while running Puppeteer: ${e}`);
